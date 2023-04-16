@@ -128,6 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# custom
+# CUSTOM
 models/*
 !models/.gitkeep

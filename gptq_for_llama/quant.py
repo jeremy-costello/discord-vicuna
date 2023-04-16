@@ -133,7 +133,7 @@ class Quantizer(nn.Module):
 try:
     import triton
     import triton.language as tl
-    import custom_autotune
+    from .custom_autotune import autotune
 
     def matmul4_kernel_config_pruner(configs, nargs):
         """
@@ -157,7 +157,7 @@ try:
             yield triton.Config({'BLOCK_SIZE_M': block_size_m, 'BLOCK_SIZE_N': block_size_n, 'BLOCK_SIZE_K': block_size_k, 'GROUP_SIZE_M': group_size_m}, num_stages=config.num_stages, num_warps=config.num_warps)
 
     # code based https://github.com/fpgaminer/GPTQ-triton
-    @custom_autotune.autotune(
+    @autotune(
         configs=[
             triton.Config({'BLOCK_SIZE_M': 64, 'BLOCK_SIZE_N': 256, 'BLOCK_SIZE_K': 32, 'GROUP_SIZE_M': 8}, num_stages=4, num_warps=4),
             triton.Config({'BLOCK_SIZE_M': 128, 'BLOCK_SIZE_N': 128, 'BLOCK_SIZE_K': 32, 'GROUP_SIZE_M': 8}, num_stages=4, num_warps=4),
@@ -274,7 +274,7 @@ try:
             used.add((block_size_m, block_size_n, block_size_k, group_size_m, config.num_stages, config.num_warps))
             yield triton.Config({'BLOCK_SIZE_M': block_size_m, 'BLOCK_SIZE_N': block_size_n, 'BLOCK_SIZE_K': block_size_k, 'GROUP_SIZE_M': group_size_m}, num_stages=config.num_stages, num_warps=config.num_warps)
 
-    @custom_autotune.autotune(
+    @autotune(
         configs=[
             triton.Config({'BLOCK_SIZE_M': 64, 'BLOCK_SIZE_N': 32, 'BLOCK_SIZE_K': 256, 'GROUP_SIZE_M': 8}, num_stages=4, num_warps=4),
             triton.Config({'BLOCK_SIZE_M': 128, 'BLOCK_SIZE_N': 32, 'BLOCK_SIZE_K': 128, 'GROUP_SIZE_M': 8}, num_stages=4, num_warps=4),

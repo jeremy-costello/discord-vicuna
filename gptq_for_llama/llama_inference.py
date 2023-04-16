@@ -3,9 +3,9 @@ import time
 import torch
 import torch.nn as nn
 
-from gptq import *
-from modelutils import *
-from quant import *
+from .gptq import *
+from .modelutils import *
+from .quant import *
 
 from transformers import AutoTokenizer
 
@@ -64,7 +64,7 @@ def load_quant(model, checkpoint, wbits, groupsize, device, warmup_autotune = Tr
 
 if __name__ == '__main__':
     import argparse
-    from datautils import *
+    from .datautils import *
 
     parser = argparse.ArgumentParser()
 
