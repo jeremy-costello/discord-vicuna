@@ -1,5 +1,7 @@
 import time
 import torch
+import wikipediaapi
+
 from transformers import AutoTokenizer
 
 import discord
@@ -11,8 +13,7 @@ from gptq_for_llama.llama_inference import load_quant
 
 '''
 TODO
-- lock model
-- add context
+- summarize context or history and re-apply
 '''
 
 
@@ -46,13 +47,14 @@ class LLaMaModel:
             "wbits": 4,
             "groupsize": 128,
             "device": 0,
-            "min_length": 10,  # 10
-            "max_length": 512,  # 50
+            "min_length": 1,  # 10
+            "max_length": 8192,  # 50
             "top_p": 0.95,
             "temperature": 0.8
         }
         
         self.locked = False
+        self.prompt = None
         self.context = None
         self.history = None
 
@@ -105,7 +107,7 @@ async def update_variable(ctx, key, value):
 
 @bot.command()
 async def request(ctx, *user_input):
-    if llama_model.model is None and llama_model.tokenizer is None:
+    if llama_model.model is None or llama_model.tokenizer is None:
         await ctx.send("Model is not loaded!")
     elif llama_model.locked:
         await ctx.send("Model is currently in use, please wait.")
@@ -116,8 +118,11 @@ async def request(ctx, *user_input):
         
         if llama_model.history is not None:
             text = llama_model.history + "\n" + text
-        elif llama_model.context is not None:
-            text = llama_model.context + "\n" + text
+        else:
+            if llama_model.context is not None:
+                text = llama_model.context + "\n" + text
+            if llama_model.prompt is not None:
+                text = llama_model.prompt + "\n" + text
         
         input_ids = llama_model.tokenizer.encode(text, return_tensors="pt").to(DEV)
 
@@ -140,22 +145,60 @@ async def request(ctx, *user_input):
         llama_model.locked = False
 
 @bot.command()
-async def custom_context(ctx, *context):
-    llama_model.context = " ".join(list(context))
-    await ctx.send(f"Context added:\n\n{llama_model.context}")
+async def custom_prompt(ctx, *prompt):
+    # You are an AI assistant. You will respond to any request the Human makes of you. You will not respond as if you are the Human.
+    prompt = " ".join(list(prompt))
+    llama_model.prompt = prompt
+    await ctx.send("Prompt added!")
 
 @bot.command()
-async def wikipedia_context(ctx):
+async def clear_prompt(ctx):
+    llama_model.prompt = None
+    await ctx.send("Prompt cleared!")
+
+@bot.command()
+async def custom_context(ctx, *context):
+    context = " ".join(list(context))
+    llama_model.context = context
+    await ctx.send("Context added!")
+
+@bot.command()
+async def wikipedia_context(ctx, page_name):
+    wiki_wiki = wikipediaapi.Wikipedia("en")
+    page = wiki_wiki.page(page_name)
+    if page.exists():
+        context = page.title + "\n" + page.summary
+        llama_model.context = context
+        await ctx.send("Context added!")
+    else:
+        await ctx.send(f"Page does not exist: {page_name}")
+
+@bot.command()
+async def summarize_context(ctx):
     pass
 
 @bot.command()
 async def clear_context(ctx):
     llama_model.context = None
-    await ctx.send("Context removed!")
+    await ctx.send("Context cleared!")
 
 @bot.command()
 async def print_history(ctx):
-    await ctx.send(llama_model.history)
+    MAX_LENGTH = 1792
+    
+    if len(llama_model.history) < MAX_LENGTH:
+        history = llama_model.history
+    else:
+        history = f"History too long. Truncated:\n\n{llama_model.history[-MAX_LENGTH:]}"
+    await ctx.send(history)
+
+@bot.command()
+async def get_history_token_length(ctx):
+    pass
+
+@bot.command()
+async def summarize_history(ctx):
+    pass
 
 @bot.command()
 async def clear_history(ctx):
