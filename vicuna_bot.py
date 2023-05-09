@@ -17,6 +17,7 @@ TODO
 '''
 
 
+# I've changed this
 DISCORD_TOKEN = "MTA5NzE3MTE2NzA1NzU1MTQ1MA.GjR2P_.EPe8L_yA_r6q2WFaFE7ERkZQfl3o4xVow2dkXI"
 
 command_prefix = "--"
