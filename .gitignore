@@ -131,3 +131,4 @@ dmypy.json
 # CUSTOM
 models/*
 !models/.gitkeep
+discord_token.txt

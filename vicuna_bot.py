@@ -11,14 +11,9 @@ from gptq_for_llama.datautils import *
 from gptq_for_llama.modelutils import *
 from gptq_for_llama.llama_inference import load_quant
 
-'''
-TODO
-- summarize context or history and re-apply
-'''
 
-
-# I've changed this
-DISCORD_TOKEN = "MTA5NzE3MTE2NzA1NzU1MTQ1MA.GjR2P_.EPe8L_yA_r6q2WFaFE7ERkZQfl3o4xVow2dkXI"
+with open('discord_token.txt', 'r') as f:
+    DISCORD_TOKEN = f.readline().strip()
 
 command_prefix = "--"
 
@@ -94,18 +89,6 @@ async def unload_model(ctx):
     
     await ctx.send("Model unloaded!")
 
-# convert to correct type
-'''
-@bot.command()
-async def update_variable(ctx, key, value):
-    if key in llama_model.variables.keys():
-        llama_model.variables[key] = value
-        msg = f"Set {key} to {value}."
-    else:
-        msg = f"Invalid key: {key}."
-    await ctx.send(msg)
-'''
-
 @bot.command()
 async def request(ctx, *user_input):
     if llama_model.model is None or llama_model.tokenizer is None:
@@ -147,7 +130,6 @@ async def request(ctx, *user_input):
 
 @bot.command()
 async def custom_prompt(ctx, *prompt):
-    # You are an AI assistant. You will respond to any request the Human makes of you. You will not respond as if you are the Human.
     prompt = " ".join(list(prompt))
     llama_model.prompt = prompt
     await ctx.send("Prompt added!")
