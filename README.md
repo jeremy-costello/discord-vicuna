@@ -24,3 +24,5 @@ Commands:
 - ```--load_model``` to load the model (requires ~12GB of VRAM)
 - ```--request $INPUT``` to chat
 - more can be found in ```vicuna_bot.py```
+
+Files in ```/gptq_for_llama``` are slightly modified from https://github.com/qwopqwop200/GPTQ-for-LLaMa (commit 58c8ab4)
